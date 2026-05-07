@@ -4,13 +4,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.internal.composableLambda
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.smartpantry.data.repository.DatabaseProvider
 import com.example.smartpantry.data.repository.ProductRepository
+import com.example.smartpantry.presentation.addproduct.AddProductScreen
 import com.example.smartpantry.presentation.home.HomeScreen
 import com.example.smartpantry.presentation.home.ProductViewModel
 import com.example.smartpantry.presentation.home.ProductViewModelFactory
+import com.example.smartpantry.presentation.navigation.Screen
 import com.example.smartpantry.ui.theme.SmartPantryTheme
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.smartpantry.presentation.addproduct.AddProductScreen
+
 
 class MainActivity : ComponentActivity() {
 
@@ -30,7 +39,32 @@ class MainActivity : ComponentActivity() {
                     factory = ProductViewModelFactory(repository)
                 )
 
-                HomeScreen(viewModel = viewModel)
+                val navController = rememberNavController()
+
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Home.route
+                ) {
+
+                    composable(Screen.Home.route) {
+
+                        HomeScreen(
+                            viewModel = viewModel,
+                            onAddClick = {
+                                navController.navigate(Screen.AddProduct.route)
+                            }
+                        )
+                    }
+
+                    composable(Screen.AddProduct.route) {
+                        AddProductScreen(
+                            viewModel = viewModel,
+                            onProductAdded = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+                }
             }
         }
     }

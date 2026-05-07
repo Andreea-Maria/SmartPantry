@@ -16,7 +16,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: ProductViewModel
+    viewModel: ProductViewModel,
+    onAddClick: () -> Unit
 ) {
 
     val products by viewModel.products.collectAsState()
@@ -28,6 +29,13 @@ fun HomeScreen(
                     Text("Smart Pantry")
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAddClick
+            ) {
+                Text("+")
+            }
         }
     ) { padding ->
 
