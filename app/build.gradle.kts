@@ -69,4 +69,7 @@ dependencies {
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
+
+    //Icon
+    implementation("androidx.compose.material:material-icons-extended")
 }

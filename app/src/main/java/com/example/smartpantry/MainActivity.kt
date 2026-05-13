@@ -61,6 +61,9 @@ class MainActivity : ComponentActivity() {
                             viewModel = viewModel,
                             onProductAdded = {
                                 navController.popBackStack()
+                            },
+                            onBackClick = {
+                                navController.popBackStack()
                             }
                         )
                     }

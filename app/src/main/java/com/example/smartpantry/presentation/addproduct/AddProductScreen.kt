@@ -12,16 +12,26 @@ import android.widget.DatePicker
 import androidx.compose.ui.platform.LocalContext
 import com.example.smartpantry.presentation.home.formatDate
 import java.util.Calendar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.Alignment
 
 @Composable
 fun AddProductScreen(
     viewModel: ProductViewModel,
-    onProductAdded: () -> Unit
+    onProductAdded: () -> Unit,
+    onBackClick: () -> Unit
 ) {
 
     var name by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var quantity by remember { mutableStateOf("") }
+    var nameError by remember { mutableStateOf(false)}
+    var quantityError by remember { mutableStateOf(false) }
     var expiryDate by remember {
         mutableStateOf(System.currentTimeMillis())
     }
@@ -52,25 +62,52 @@ fun AddProductScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
-        Text(
-            text = "Add Product",
-            style = MaterialTheme.typography.headlineMedium
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                modifier = Modifier
+                    .clickable {
+                        onBackClick()
+                    }
+                    .padding(end = 12.dp)
+            )
+
+            Text(
+                text = "AddProduct",
+                style = MaterialTheme.typography.headlineLarge
+            )
+        }
 
         OutlinedTextField(
             value = name,
-            onValueChange = {
-                name = it
+            onValueChange = { newValue ->
+                name = newValue
+                nameError = false
             },
             label = {
                 Text("Product name")
             },
+            isError = nameError,
             modifier = Modifier.fillMaxWidth()
         )
+
+        if(nameError) {
+            Text(
+                text = "Please enter product name",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
 
         OutlinedTextField(
             value = category,
@@ -85,29 +122,85 @@ fun AddProductScreen(
 
         OutlinedTextField(
             value = quantity,
-            onValueChange = {
-                quantity = it
+            onValueChange = { newValue ->
+                quantity = newValue
+                quantityError = false
             },
             label = {
                 Text("Quantity")
             },
+            isError = quantityError,
             modifier = Modifier.fillMaxWidth()
         )
 
+        if(quantityError) {
+            Text(
+                text = "Please enter a valid quantity",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
         Button(
             onClick = {
-                datePickerDialog.show()
+                nameError = name.isBlank()
+
+                quantityError =
+                    quantity.toIntOrNull() == null ||
+                            quantity.toInt() <= 0
+
+                if(nameError || quantityError) {
+                    return@Button
+                }
+
+                val product = ProductEntity(
+                    name = name,
+                    category = category,
+                    quantity = quantity.toInt(),
+                    expiryDate = expiryDate
+                )
+
+                viewModel.addProduct(product)
+
+                onProductAdded()
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            contentPadding = PaddingValues(vertical = 14.dp)
         ) {
+
+            Icon(
+                imageVector = Icons.Default.DateRange,
+                contentDescription = null
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
             Text(
                 text = "Select Epiry Date"
             )
         }
 
-        Text(
-            text = "Selected: ${formatDate(expiryDate)}"
-        )
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+
+                Text(
+                    text = "Selected expiry date",
+                    style = MaterialTheme.typography.labelLarge
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = formatDate(expiryDate),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
 
         Button(
             onClick = {
@@ -123,8 +216,17 @@ fun AddProductScreen(
 
                 onProductAdded()
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            contentPadding = PaddingValues(vertical = 14.dp)
         ) {
+            Icon(
+                imageVector = Icons.Default.Save,
+                contentDescription = null
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
             Text("Save Product")
         }
     }
