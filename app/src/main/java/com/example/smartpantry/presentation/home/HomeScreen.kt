@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.smartpantry.data.local.ProductEntity
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,8 +81,28 @@ fun ProductItem(
     onDelete: () -> Unit
 ) {
 
+    val currentTime = System.currentTimeMillis()
+
+    val cardColor = when {
+
+        product.expiryDate < currentTime -> {
+            Color(0xFFFFCDD2)
+        }
+
+        product.expiryDate - currentTime < 3 * 24 * 60 * 60 * 1000 -> {
+            Color(0xFFFFF9C4)
+        }
+
+        else -> {
+            Color(0xFFC8E6C9)
+        }
+    }
+
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = cardColor
+        )
     ) {
 
         Column(
@@ -90,16 +111,24 @@ fun ProductItem(
 
             Text(
                 text = product.name,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleLarge
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            Text("Category: ${product.category}")
+            Text(
+                text = "Category: ${product.category}"
+            )
 
-            Text("Quantity: ${product.quantity}")
+            Text(
+                text = "Quantity: ${product.quantity}"
+            )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Expires: ${formatDate(product.expiryDate)}"
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             Button(
                 onClick = onDelete
