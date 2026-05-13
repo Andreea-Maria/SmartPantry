@@ -19,6 +19,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.smartpantry.presentation.addproduct.AddProductScreen
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.smartpantry.presentation.worker.ExpiryCheckWorker
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.ActivityCompat
 
 
 class MainActivity : ComponentActivity() {
@@ -30,6 +37,28 @@ class MainActivity : ComponentActivity() {
 
         val database = DatabaseProvider.getDatabase(this)
         val repository = ProductRepository(database.productDao())
+        val workRequest =
+            OneTimeWorkRequestBuilder<ExpiryCheckWorker>()
+                .build()
+
+        WorkManager.getInstance(this)
+            .enqueue(workRequest)
+
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                100
+            )
+        } else {
+            scheduleExpiryCheck()
+        }
 
         setContent {
 
@@ -71,4 +100,30 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun scheduleExpiryCheck() {
+        val workRequest =
+            OneTimeWorkRequestBuilder<ExpiryCheckWorker>()
+                .build()
+
+        WorkManager.getInstance(this)
+            .enqueue(workRequest)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (
+            requestCode == 100 &&
+            grantResults.isNotEmpty() &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
+            scheduleExpiryCheck()
+        }
+    }
+
 }
