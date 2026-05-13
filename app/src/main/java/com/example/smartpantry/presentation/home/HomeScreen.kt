@@ -13,6 +13,10 @@ import androidx.compose.ui.unit.dp
 import com.example.smartpantry.data.local.ProductEntity
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.foundation.background
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,12 +65,41 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
-                items(products) { product ->
+                items(
+                    items = products,
+                    key = { product -> product.id }
+                ) { product ->
+                    val dismissState = rememberSwipeToDismissBoxState(
+                        confirmValueChange = { value ->
+                            if (value == SwipeToDismissBoxValue.EndToStart)  {
+                                viewModel.deleteProduct(product)
+                                true
+                            } else {
+                                false
+                            }
+                        }
+                    )
 
-                    ProductItem(
-                        product = product,
-                        onDelete = {
-                            viewModel.deleteProduct(product)
+                    SwipeToDismissBox(
+                        state = dismissState,
+                        backgroundContent = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(0xFFFFCDD2))
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+                                Text("Delete")
+                            }
+                        },
+                        content = {
+                            ProductItem(
+                                product = product,
+                                onDelete = {
+                                    viewModel.deleteProduct(product)
+                                }
+                            )
                         }
                     )
                 }
