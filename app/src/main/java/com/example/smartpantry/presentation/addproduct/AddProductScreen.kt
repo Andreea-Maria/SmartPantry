@@ -7,6 +7,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.smartpantry.data.local.ProductEntity
 import com.example.smartpantry.presentation.home.ProductViewModel
+import android.app.DatePickerDialog
+import android.widget.DatePicker
+import androidx.compose.ui.platform.LocalContext
+import com.example.smartpantry.presentation.home.formatDate
+import java.util.Calendar
 
 @Composable
 fun AddProductScreen(
@@ -17,6 +22,32 @@ fun AddProductScreen(
     var name by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var quantity by remember { mutableStateOf("") }
+    var expiryDate by remember {
+        mutableStateOf(System.currentTimeMillis())
+    }
+
+    val context = LocalContext.current
+
+    val calendar = Calendar.getInstance()
+
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _: DatePicker, year:  Int, month: Int, dayOfMonth: Int ->
+
+            val selectedCalendar = Calendar.getInstance()
+
+            selectedCalendar.set(
+                year,
+                month,
+                dayOfMonth
+            )
+
+            expiryDate = selectedCalendar.timeInMillis
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
 
     Column(
         modifier = Modifier
@@ -65,12 +96,27 @@ fun AddProductScreen(
 
         Button(
             onClick = {
+                datePickerDialog.show()
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Select Epiry Date"
+            )
+        }
+
+        Text(
+            text = "Selected: ${formatDate(expiryDate)}"
+        )
+
+        Button(
+            onClick = {
 
                 val product = ProductEntity(
                     name = name,
                     category = category,
                     quantity = quantity.toIntOrNull() ?: 1,
-                    expiryDate = System.currentTimeMillis()
+                    expiryDate = expiryDate
                 )
 
                 viewModel.addProduct(product)
