@@ -25,7 +25,14 @@ import com.example.smartpantry.presentation.worker.ExpiryCheckWorker
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.compose.runtime.collectAsState
 import androidx.core.app.ActivityCompat
+import androidx.navigation.NavHost
+import com.example.smartpantry.data.auth.AuthRepository
+import com.example.smartpantry.presentation.auth.AuthScreen
+import com.example.smartpantry.presentation.auth.AuthViewModel
+import com.example.smartpantry.presentation.auth.AuthViewModelFactory
+import androidx.compose.runtime.getValue
 
 
 class MainActivity : ComponentActivity() {
@@ -37,6 +44,7 @@ class MainActivity : ComponentActivity() {
 
         val database = DatabaseProvider.getDatabase(this)
         val repository = ProductRepository(database.productDao())
+        val authRepository = AuthRepository()
         val workRequest =
             OneTimeWorkRequestBuilder<ExpiryCheckWorker>()
                 .build()
@@ -68,35 +76,50 @@ class MainActivity : ComponentActivity() {
                     factory = ProductViewModelFactory(repository)
                 )
 
-                val navController = rememberNavController()
+                val authViewModel: AuthViewModel = viewModel(
+                    factory = AuthViewModelFactory(authRepository)
+                )
 
-                NavHost(
-                    navController = navController,
-                    startDestination = Screen.Home.route
-                ) {
+                val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
-                    composable(Screen.Home.route) {
+               if(!isLoggedIn) {
 
-                        HomeScreen(
-                            viewModel = viewModel,
-                            onAddClick = {
-                                navController.navigate(Screen.AddProduct.route)
-                            }
-                        )
-                    }
+                   AuthScreen(
+                       authViewModel = authViewModel
+                   )
+               } else {
 
-                    composable(Screen.AddProduct.route) {
-                        AddProductScreen(
-                            viewModel = viewModel,
-                            onProductAdded = {
-                                navController.popBackStack()
-                            },
-                            onBackClick = {
-                                navController.popBackStack()
-                            }
-                        )
-                    }
-                }
+                   val navController = rememberNavController()
+
+                   NavHost(
+                       navController = navController,
+                       startDestination = Screen.Home.route
+                   ) {
+
+                       composable(Screen.Home.route) {
+
+                           HomeScreen(
+                               viewModel = viewModel,
+                               onAddClick = {
+                                   navController.navigate(Screen.AddProduct.route)
+                               }
+                           )
+                       }
+
+                       composable(Screen.AddProduct.route) {
+
+                           AddProductScreen(
+                               viewModel = viewModel,
+                               onProductAdded = {
+                                   navController.popBackStack()
+                               },
+                               onBackClick = {
+                                   navController.popBackStack()
+                               }
+                           )
+                       }
+                   }
+               }
             }
         }
     }
