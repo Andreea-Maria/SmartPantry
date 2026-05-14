@@ -43,6 +43,10 @@ fun ScanScreen(
         mutableStateOf("")
     }
 
+    var detectedDate by remember {
+        mutableStateOf("")
+    }
+
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -115,7 +119,15 @@ fun ScanScreen(
                                 imageProxy
                             ) { text ->
 
-                                detectedText = text
+                                if(text.isNotBlank()) {
+                                    detectedText = text
+                                }
+
+                                val extractedDate = extractExpiryDate(text)
+
+                                if (extractedDate.isNotBlank()) {
+                                    detectedDate = extractedDate
+                                }
                             }
                         }
 
@@ -171,6 +183,29 @@ fun ScanScreen(
                     )
                 }
             }
+
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+
+                    Text(
+                        text = "Detected Expiry Date",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = detectedDate.ifBlank {
+                            "No expiry date detected"
+                        }
+                    )
+                }
+            }
         } else {
 
             Text(
@@ -207,9 +242,9 @@ private fun processImageProxy(
         recognizer.process(image)
             .addOnSuccessListener { visionText ->
 
-                onTextDetected(
-                    visionText.text
-                )
+                val detectedText = visionText.text
+
+                onTextDetected(detectedText)
             }
             .addOnFailureListener {
                 it.printStackTrace()
@@ -221,4 +256,16 @@ private fun processImageProxy(
     } else {
         imageProxy.close()
     }
+}
+
+private fun extractExpiryDate(
+    text: String
+): String {
+
+    val regex =
+        Regex(
+            """\b\d{2}[./-]\d{2}[./-]\d{4}\b"""
+        )
+
+    return regex.find(text)?.value ?: ""
 }
