@@ -25,6 +25,7 @@ import com.example.smartpantry.presentation.worker.ExpiryCheckWorker
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHost
@@ -33,6 +34,8 @@ import com.example.smartpantry.presentation.auth.AuthScreen
 import com.example.smartpantry.presentation.auth.AuthViewModel
 import com.example.smartpantry.presentation.auth.AuthViewModelFactory
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import com.example.smartpantry.presentation.scan.ScanScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -116,6 +119,18 @@ class MainActivity : ComponentActivity() {
                                onProductAdded = {
                                    navController.popBackStack()
                                },
+                               onBackClick = {
+                                   navController.popBackStack()
+                               },
+                               onScanClick = {
+                                   navController.navigate(Screen.Scan.route)
+                               }
+                           )
+                       }
+
+                       composable(Screen.Scan.route) {
+
+                           ScanScreen(
                                onBackClick = {
                                    navController.popBackStack()
                                }

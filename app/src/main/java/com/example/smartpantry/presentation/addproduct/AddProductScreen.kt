@@ -24,7 +24,8 @@ import androidx.compose.ui.Alignment
 fun AddProductScreen(
     viewModel: ProductViewModel,
     onProductAdded: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onScanClick: () -> Unit
 ) {
 
     var name by remember { mutableStateOf("") }
@@ -179,6 +180,15 @@ fun AddProductScreen(
             Text(
                 text = "Select Epiry Date"
             )
+        }
+
+        OutlinedButton(
+            onClick = {
+                onScanClick()
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Scan Expiry Date")
         }
 
         Card(
