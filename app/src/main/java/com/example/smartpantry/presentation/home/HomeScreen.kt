@@ -22,7 +22,8 @@ import androidx.compose.foundation.background
 @Composable
 fun HomeScreen(
     viewModel: ProductViewModel,
-    onAddClick: () -> Unit
+    onAddClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
 
     val products by viewModel.products.collectAsState()
@@ -32,6 +33,16 @@ fun HomeScreen(
             TopAppBar(
                 title = {
                     Text("Smart Pantry")
+                },
+                actions = {
+
+                    TextButton(
+                        onClick = {
+                            onLogoutClick()
+                        }
+                    ) {
+                        Text("Logout")
+                    }
                 }
             )
         },

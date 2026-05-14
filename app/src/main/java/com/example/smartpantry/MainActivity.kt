@@ -102,6 +102,9 @@ class MainActivity : ComponentActivity() {
                                viewModel = viewModel,
                                onAddClick = {
                                    navController.navigate(Screen.AddProduct.route)
+                               },
+                               onLogoutClick = {
+                                   authViewModel.logout()
                                }
                            )
                        }
