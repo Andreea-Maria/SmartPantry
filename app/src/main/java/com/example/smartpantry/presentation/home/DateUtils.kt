@@ -12,3 +12,24 @@ fun formatDate(timestamp: Long): String {
 
     return formatter.format(Date(timestamp))
 }
+
+fun convertDateToMillis(
+    date: String
+): Long {
+
+    return try {
+
+        val formatter =
+            SimpleDateFormat(
+                "dd.MM.yyyy",
+                Locale.getDefault()
+            )
+
+        formatter.parse(date)?.time
+            ?: System.currentTimeMillis()
+
+    } catch (exception: Exception) {
+
+        System.currentTimeMillis()
+    }
+}

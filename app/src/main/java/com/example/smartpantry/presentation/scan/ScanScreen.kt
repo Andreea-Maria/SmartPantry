@@ -33,7 +33,8 @@ import androidx.camera.core.ExperimentalGetImage
 
 @Composable
 fun ScanScreen(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onDateDetected: (String) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -204,6 +205,18 @@ fun ScanScreen(
                             "No expiry date detected"
                         }
                     )
+                }
+            }
+
+            if (detectedDate.isNotBlank()) {
+
+                Button(
+                    onClick = {
+                        onDateDetected(detectedDate)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Use Detected Date")
                 }
             }
         } else {

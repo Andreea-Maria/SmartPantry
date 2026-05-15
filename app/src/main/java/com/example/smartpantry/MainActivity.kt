@@ -114,6 +114,11 @@ class MainActivity : ComponentActivity() {
 
                        composable(Screen.AddProduct.route) {
 
+                           val scannedDate =
+                               navController.currentBackStackEntry
+                                   ?.savedStateHandle
+                                   ?.get<String>("scanned_date")
+
                            AddProductScreen(
                                viewModel = viewModel,
                                onProductAdded = {
@@ -123,15 +128,29 @@ class MainActivity : ComponentActivity() {
                                    navController.popBackStack()
                                },
                                onScanClick = {
-                                   navController.navigate(Screen.Scan.route)
-                               }
+                                   navController.navigate(
+                                       Screen.Scan.createRoute("")
+                                   )
+                               },
+                               scannedDate = scannedDate
                            )
                        }
 
-                       composable(Screen.Scan.route) {
+                       composable("scan/{detectedDate}") {
 
                            ScanScreen(
                                onBackClick = {
+                                   navController.popBackStack()
+                               },
+                               onDateDetected = { detectedDate ->
+
+                                   navController.previousBackStackEntry
+                                       ?.savedStateHandle
+                                       ?.set(
+                                           "scanned_date",
+                                           detectedDate
+                                       )
+
                                    navController.popBackStack()
                                }
                            )

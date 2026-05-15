@@ -19,13 +19,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.Alignment
+import com.example.smartpantry.presentation.home.convertDateToMillis
 
 @Composable
 fun AddProductScreen(
     viewModel: ProductViewModel,
     onProductAdded: () -> Unit,
     onBackClick: () -> Unit,
-    onScanClick: () -> Unit
+    onScanClick: () -> Unit,
+    scannedDate: String?
 ) {
 
     var name by remember { mutableStateOf("") }
@@ -35,6 +37,15 @@ fun AddProductScreen(
     var quantityError by remember { mutableStateOf(false) }
     var expiryDate by remember {
         mutableStateOf(System.currentTimeMillis())
+    }
+
+    LaunchedEffect(scannedDate) {
+
+        scannedDate?.let {
+
+            expiryDate =
+                convertDateToMillis(it)
+        }
     }
 
     val context = LocalContext.current
