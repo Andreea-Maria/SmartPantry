@@ -17,6 +17,8 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.foundation.background
+import androidx.compose.runtime.*
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,6 +29,8 @@ fun HomeScreen(
 ) {
 
     val products by viewModel.products.collectAsState()
+
+    var searchText by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -75,6 +79,20 @@ fun HomeScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+
+                item {
+                    OutlinedTextField(
+                        value = searchText,
+                        onValueChange = { newValue ->
+                            searchText = newValue
+                            viewModel.updateSearchQuery(newValue)
+                        },
+                        label = {
+                            Text("Search products")
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
                 items(
                     items = products,
