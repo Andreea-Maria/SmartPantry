@@ -144,26 +144,7 @@ fun AddProductScreen(
 
         Button(
             onClick = {
-                nameError = name.isBlank()
-
-                quantityError =
-                    quantity.toIntOrNull() == null ||
-                            quantity.toInt() <= 0
-
-                if(nameError || quantityError) {
-                    return@Button
-                }
-
-                val product = ProductEntity(
-                    name = name,
-                    category = category,
-                    quantity = quantity.toInt(),
-                    expiryDate = expiryDate
-                )
-
-                viewModel.addProduct(product)
-
-                onProductAdded()
+                datePickerDialog.show()
             },
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.large,
@@ -214,11 +195,20 @@ fun AddProductScreen(
 
         Button(
             onClick = {
+                nameError = name.isBlank()
+
+                quantityError =
+                    quantity.toIntOrNull() == null ||
+                            quantity.toInt() <= 0
+
+                if (nameError || quantityError) {
+                    return@Button
+                }
 
                 val product = ProductEntity(
                     name = name,
                     category = category,
-                    quantity = quantity.toIntOrNull() ?: 1,
+                    quantity = quantity.toInt(),
                     expiryDate = expiryDate
                 )
 
