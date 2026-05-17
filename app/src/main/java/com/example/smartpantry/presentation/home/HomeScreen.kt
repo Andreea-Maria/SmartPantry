@@ -19,6 +19,7 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.foundation.background
 import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,6 +42,10 @@ fun HomeScreen(
             viewModel.expiringSoonProducts.collectAsState(initial = 0)
 
     var searchText by remember { mutableStateOf("") }
+
+    var expanded by remember { mutableStateOf(false) }
+
+    var selectedSort by remember { mutableStateOf("Expiry") }
 
     Scaffold(
         topBar = {
@@ -128,6 +133,61 @@ fun HomeScreen(
                         },
                         modifier = Modifier.fillMaxWidth()
                     )
+
+                }
+
+                item {
+
+                    Box {
+
+                        OutlinedButton(
+                            onClick = {
+                                expanded = true
+                            }
+                        ) {
+                            Text("Sort: $selectedSort")
+                        }
+
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = {
+                                expanded = false
+                            }
+                        ) {
+
+                            DropdownMenuItem(
+                                text = {
+                                    Text("Expiry")
+                                },
+                                onClick = {
+
+                                    selectedSort = "Expiry"
+
+                                    viewModel.updateSortOption(
+                                        "Expiry"
+                                    )
+
+                                    expanded = false
+                                }
+                            )
+
+                            DropdownMenuItem(
+                                text = {
+                                    Text("Name")
+                                },
+                                onClick = {
+
+                                    selectedSort = "Name"
+
+                                    viewModel.updateSortOption(
+                                        "Name"
+                                    )
+
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
                 }
 
                 items(

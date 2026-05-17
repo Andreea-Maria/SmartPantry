@@ -1,5 +1,6 @@
 package com.example.smartpantry.presentation.home
 
+import androidx.camera.core.impl.utils.Optional
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -9,7 +10,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
@@ -19,19 +19,56 @@ class ProductViewModel(
 
     private val searchQuery = MutableStateFlow("")
 
+    private val sortOption = MutableStateFlow("Expiry")
+
     fun updateSearchQuery(query: String) {
         searchQuery.value = query
     }
 
+    fun updateSortOption(option: String) {
+        sortOption.value = option
+    }
+
     val products = repository.getAllProducts()
-        .combine(searchQuery) { products, query ->
+        .combine(
+            searchQuery
+        ) { products, query ->
+
             if (query.isBlank()) {
                 products
             } else {
+
                 products.filter { product ->
-                    product.name.contains(query, ignoreCase = true) ||
-                            product.category.contains(query, ignoreCase = true)
+
+                    product.name.contains(
+                        query,
+                        ignoreCase = true
+                    ) ||
+                            product.category.contains(
+                                query,
+                                ignoreCase = true
+                            )
                 }
+            }
+        }
+        .combine(sortOption) { products, sort ->
+
+            when (sort) {
+
+                "Name" -> {
+                    products.sortedBy {
+                        it.name
+                    }
+                }
+
+
+                "Expiry" -> {
+                    products.sortedBy {
+                        it.expiryDate
+                    }
+                }
+
+                else -> products
             }
         }
         .stateIn(
