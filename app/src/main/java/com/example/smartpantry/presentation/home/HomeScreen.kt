@@ -1,5 +1,6 @@
 package com.example.smartpantry.presentation.home
 
+import android.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,6 +30,15 @@ fun HomeScreen(
 ) {
 
     val products by viewModel.products.collectAsState()
+
+    val totalProducts by
+            viewModel.totalProducts.collectAsState(initial = 0)
+
+    val expiredProducts by
+            viewModel.expiredProducts.collectAsState(initial = 0)
+
+    val expiringSoonProducts by
+            viewModel.expiringSoonProducts.collectAsState(initial = 0)
 
     var searchText by remember { mutableStateOf("") }
 
@@ -79,6 +89,32 @@ fun HomeScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement =
+                            Arrangement.spacedBy(12.dp)
+                    ) {
+
+                        StatisticCard(
+                            title = "Total",
+                            value = totalProducts.toString(),
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        StatisticCard(
+                            title = "Expired",
+                            value = expiredProducts.toString(),
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        StatisticCard(
+                            title = "Soon",
+                            value = expiringSoonProducts.toString(),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
 
                 item {
                     OutlinedTextField(
@@ -133,6 +169,37 @@ fun HomeScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun StatisticCard(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+
+    Card(
+        modifier = modifier
+    ) {
+
+        Column(
+            modifier = Modifier
+                .padding(16.dp),
+            horizontalAlignment =
+                Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                text = value,
+                style =
+                    MaterialTheme.typography.headlineMedium
+            )
+
+            Text(
+                text = title
+            )
         }
     }
 }

@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 
 class ProductViewModel(
     private val repository: ProductRepository
@@ -38,6 +39,36 @@ class ProductViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    val totalProducts = products
+        .map { it.size }
+
+    val expiredProducts = products
+        .map { productList ->
+
+            val currentTime =
+                System.currentTimeMillis()
+
+            productList.count {
+                it.expiryDate < currentTime
+            }
+        }
+
+    val expiringSoonProducts = products
+        .map { productList ->
+
+            val currentTime =
+                System.currentTimeMillis()
+
+            val sevenDays =
+                7L * 24* 60 * 60 * 1000
+
+            productList.count {
+
+                it.expiryDate in
+                        currentTime..(currentTime + sevenDays)
+            }
+        }
 
     fun addProduct(product: ProductEntity) {
         viewModelScope.launch {
