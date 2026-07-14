@@ -20,6 +20,7 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.foundation.background
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.clickable
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,7 +28,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun HomeScreen(
     viewModel: ProductViewModel,
     onAddClick: () -> Unit,
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onProductClick: (Int) -> Unit
 ) {
 
     val products by viewModel.products.collectAsState()
@@ -223,6 +225,9 @@ fun HomeScreen(
                                 product = product,
                                 onDelete = {
                                     viewModel.deleteProduct(product)
+                                },
+                                onClick = {
+                                    onProductClick(product.id)
                                 }
                             )
                         }
@@ -267,7 +272,8 @@ private fun StatisticCard(
 @Composable
 fun ProductItem(
     product: ProductEntity,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onClick: () -> Unit
 ) {
 
     val currentTime = System.currentTimeMillis()
@@ -288,7 +294,11 @@ fun ProductItem(
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            },
         colors = CardDefaults.cardColors(
             containerColor = cardColor
         )

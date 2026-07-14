@@ -14,4 +14,10 @@ sealed class Screen(val route: String) {
             return "scan/$detectedDate"
         }
     }
+
+    data object EditProduct : Screen("edit_product/{productId}") {
+        fun createRoute(productId: Int): String {
+            return "edit_product/$productId"
+        }
+    }
 }

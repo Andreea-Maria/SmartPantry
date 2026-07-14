@@ -36,6 +36,9 @@ import com.example.smartpantry.presentation.auth.AuthViewModelFactory
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.example.smartpantry.presentation.scan.ScanScreen
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.smartpantry.presentation.editproduct.EditProductScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -108,6 +111,11 @@ class MainActivity : ComponentActivity() {
                                },
                                onLogoutClick = {
                                    authViewModel.logout()
+                               },
+                               onProductClick = { productId ->
+                                   navController.navigate(
+                                       Screen.EditProduct.createRoute(productId)
+                                   )
                                }
                            )
                        }
@@ -151,6 +159,34 @@ class MainActivity : ComponentActivity() {
                                            detectedDate
                                        )
 
+                                   navController.popBackStack()
+                               }
+                           )
+                       }
+
+                       composable(
+                           route = Screen.EditProduct.route,
+                           arguments = listOf(
+                               navArgument("productId") {
+                                   type = NavType.IntType
+                               }
+                           )
+                       ) {
+                           backStackEntry ->
+
+                           val productId =
+                               backStackEntry.arguments
+                                   ?.getInt("productId")
+                                   ?: return@composable
+
+                           EditProductScreen(
+                               productId = productId,
+                               viewModel = viewModel,
+                               onProductUpdated = {
+                                   navController.popBackStack()
+                               },
+                               onBackClick = {
+                                   viewModel.clearSelectedProduct()
                                    navController.popBackStack()
                                }
                            )

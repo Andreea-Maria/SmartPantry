@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.StateFlow
 
 class ProductViewModel(
     private val repository: ProductRepository
@@ -20,6 +21,12 @@ class ProductViewModel(
     private val searchQuery = MutableStateFlow("")
 
     private val sortOption = MutableStateFlow("Expiry")
+
+    private val _selectedProduct =
+        MutableStateFlow<ProductEntity?>(null)
+
+    val selectedProduct: StateFlow<ProductEntity?> =
+        _selectedProduct
 
     fun updateSearchQuery(query: String) {
         searchQuery.value = query
@@ -118,6 +125,24 @@ class ProductViewModel(
             repository.deleteProduct(product)
         }
     }
+
+    fun loadProduct(productId: Int) {
+        viewModelScope.launch {
+            _selectedProduct.value =
+                repository.getProductById(productId)
+        }
+    }
+
+    fun updateProduct(product: ProductEntity) {
+        viewModelScope.launch {
+            repository.updateProduct(product)
+        }
+    }
+
+    fun clearSelectedProduct() {
+        _selectedProduct.value = null
+    }
+
 }
 
 class ProductViewModelFactory(
