@@ -22,6 +22,8 @@ class ProductViewModel(
 
     private val sortOption = MutableStateFlow("Expiry")
 
+    private val filterOption  = MutableStateFlow("All")
+
     private val _selectedProduct =
         MutableStateFlow<ProductEntity?>(null)
 
@@ -34,6 +36,10 @@ class ProductViewModel(
 
     fun updateSortOption(option: String) {
         sortOption.value = option
+    }
+
+    fun updateFilterOption(option: String) {
+        filterOption.value = option
     }
 
     val products = repository.getAllProducts()
@@ -72,6 +78,29 @@ class ProductViewModel(
                 "Expiry" -> {
                     products.sortedBy {
                         it.expiryDate
+                    }
+                }
+
+                else -> products
+            }
+        }
+        .combine(filterOption) { products, filter ->
+
+            val currentTime = System.currentTimeMillis()
+            val sevenDays = 7L * 24 * 60 * 60 * 1000
+
+            when (filter) {
+
+                "Expired" -> {
+                    products.filter {
+                        it.expiryDate < currentTime
+                    }
+                }
+
+                "Soon" -> {
+                    products.filter {
+                        it.expiryDate in
+                                currentTime..(currentTime + sevenDays)
                     }
                 }
 

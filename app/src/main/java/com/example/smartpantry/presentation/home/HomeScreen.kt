@@ -1,6 +1,7 @@
 package com.example.smartpantry.presentation.home
 
 import android.R
+import android.graphics.Paint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -49,6 +50,10 @@ fun HomeScreen(
 
     var selectedSort by remember { mutableStateOf("Expiry") }
 
+    var filterExpanded by remember { mutableStateOf(false) }
+
+    var selectedFilter by remember { mutableStateOf("All") }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -75,19 +80,6 @@ fun HomeScreen(
             }
         }
     ) { padding ->
-
-        if (products.isEmpty()) {
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("No products added yet")
-            }
-
-        } else {
 
             LazyColumn(
                 modifier = Modifier
@@ -192,51 +184,128 @@ fun HomeScreen(
                     }
                 }
 
-                items(
-                    items = products,
-                    key = { product -> product.id }
-                ) { product ->
-                    val dismissState = rememberSwipeToDismissBoxState(
-                        confirmValueChange = { value ->
-                            if (value == SwipeToDismissBoxValue.EndToStart)  {
-                                viewModel.deleteProduct(product)
-                                true
-                            } else {
-                                false
-                            }
-                        }
-                    )
+                item {
+                    Box {
 
-                    SwipeToDismissBox(
-                        state = dismissState,
-                        backgroundContent = {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color(0xFFFFCDD2))
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.CenterEnd
-                            ) {
-                                Text("Delete")
+                        OutlinedButton(
+                            onClick = {
+                                filterExpanded = true
                             }
-                        },
-                        content = {
-                            ProductItem(
-                                product = product,
-                                onDelete = {
-                                    viewModel.deleteProduct(product)
+                        ) {
+                            Text("Filter: $selectedFilter")
+                        }
+
+                        DropdownMenu(
+                            expanded = filterExpanded,
+                            onDismissRequest = {
+                                filterExpanded = false
+                            }
+                        ) {
+
+                            DropdownMenuItem(
+                                text = {
+                                    Text("All")
                                 },
                                 onClick = {
-                                    onProductClick(product.id)
+                                    selectedFilter = "All"
+                                    viewModel.updateFilterOption("All")
+                                    filterExpanded = false
+                                }
+                            )
+
+                            DropdownMenuItem(
+                                text = {
+                                    Text("Expired")
+                                },
+                                onClick = {
+                                    selectedFilter = "Expired"
+                                    viewModel.updateFilterOption("Expired")
+                                    filterExpanded = false
+                                }
+                            )
+
+                            DropdownMenuItem(
+                                text = {
+                                    Text("Expiring Soon")
+                                },
+                                onClick = {
+                                    selectedFilter = "Soon"
+                                    viewModel.updateFilterOption("Soon")
+                                    filterExpanded = false
                                 }
                             )
                         }
-                    )
+                    }
+                }
+
+                if (products.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 48.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (
+                                    searchText.isNotBlank() ||
+                                    selectedFilter != "All"
+                                ) {
+                                    "No products match your filters"
+                                } else {
+                                    "No products added yet"
+                                },
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    }
+                } else {
+
+                    items(
+                        items = products,
+                        key = { product -> product.id }
+                    ) { product ->
+                        val dismissState = rememberSwipeToDismissBoxState(
+                            confirmValueChange = { value ->
+                                if (value == SwipeToDismissBoxValue.EndToStart) {
+                                    viewModel.deleteProduct(product)
+                                    true
+                                } else {
+                                    false
+                                }
+                            }
+                        )
+
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            backgroundContent = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color(0xFFFFCDD2))
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Text("Delete")
+                                }
+                            },
+                            content = {
+                                ProductItem(
+                                    product = product,
+                                    onDelete = {
+                                        viewModel.deleteProduct(product)
+                                    },
+                                    onClick = {
+                                        onProductClick(product.id)
+                                    }
+                                )
+                            }
+                        )
+                    }
                 }
             }
         }
     }
-}
 
 @Composable
 private fun StatisticCard(
