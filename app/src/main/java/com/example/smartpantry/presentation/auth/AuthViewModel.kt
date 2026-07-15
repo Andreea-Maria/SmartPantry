@@ -50,4 +50,8 @@ class AuthViewModel @Inject constructor(
         authRepository.logout()
         _isLoggedIn.value = false
     }
+
+    fun clearError() {
+        _errorMessage.value = null
+    }
 }
