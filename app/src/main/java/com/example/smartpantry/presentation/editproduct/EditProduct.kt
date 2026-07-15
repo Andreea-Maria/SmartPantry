@@ -62,6 +62,7 @@ fun EditProductScreen(
 
     var nameError by remember { mutableStateOf(false) }
     var quantityError by remember { mutableStateOf(false) }
+    var barcode by remember { mutableStateOf("") }
 
     LaunchedEffect(productId) {
         viewModel.loadProduct(productId)
@@ -73,6 +74,7 @@ fun EditProductScreen(
             category = product.category
             quantity = product.quantity.toString()
             expiryDate = product.expiryDate
+            barcode = product.barcode.orEmpty()
         }
     }
 
@@ -178,6 +180,18 @@ fun EditProductScreen(
                 )
             }
 
+            OutlinedTextField(
+                value = barcode,
+                onValueChange = { newValue ->
+                    barcode = newValue
+                },
+                label = {
+                    Text("Barcode")
+                },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
             Button(
                 onClick = {
                     datePickerDialog.show()
@@ -217,6 +231,7 @@ fun EditProductScreen(
                         category = category,
                         quantity = quantity.toInt(),
                         expiryDate = expiryDate,
+                        barcode = barcode.trim().ifBlank { null },
                         notes = selectedProduct?.notes
                     )
 

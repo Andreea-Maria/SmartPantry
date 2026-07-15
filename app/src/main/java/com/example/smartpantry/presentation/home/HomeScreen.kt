@@ -392,9 +392,25 @@ fun ProductItem(
                 text = "Quantity: ${product.quantity}"
             )
 
+            product.barcode?.let { barcode ->
+                Text(
+                    text = "Barcode: $barcode"
+                )
+            }
+
             Text(
                 text = "Expires: ${formatDate(product.expiryDate)}"
             )
+
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Text(
+                    text = getExpiryStatus(product.expiryDate),
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -404,5 +420,21 @@ fun ProductItem(
                 Text("Delete")
             }
         }
+    }
+}
+
+private fun getExpiryStatus(expiryDate: Long): String {
+    val currentTime = System.currentTimeMillis()
+    val oneDay = 24L * 60 * 60 * 1000
+
+    val daysDifference =
+        ((expiryDate - currentTime) / oneDay).toInt()
+
+    return when {
+        expiryDate < currentTime -> "Expired"
+        daysDifference == 0 -> "Expires today"
+        daysDifference == 1 -> "1 day left"
+        daysDifference in 2..7 -> "$daysDifference days left"
+        else -> "Safe"
     }
 }

@@ -86,4 +86,5 @@ dependencies {
 
     // ML Kit OCR
     implementation(libs.mlkit.text.recognition)
+    implementation(libs.mlkit.barcode.scanning)
 }

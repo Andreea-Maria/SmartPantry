@@ -39,6 +39,9 @@ import com.example.smartpantry.presentation.scan.ScanScreen
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.smartpantry.presentation.editproduct.EditProductScreen
+import com.example.smartpantry.presentation.barcode.BarcodeScanScreen
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 
 class MainActivity : ComponentActivity() {
@@ -120,12 +123,23 @@ class MainActivity : ComponentActivity() {
                            )
                        }
 
-                       composable(Screen.AddProduct.route) {
+                       composable(Screen.AddProduct.route) { backStackEntry ->
 
-                           val scannedDate =
-                               navController.currentBackStackEntry
-                                   ?.savedStateHandle
-                                   ?.get<String>("scanned_date")
+                           val scannedDate by backStackEntry
+                               .savedStateHandle
+                               .getStateFlow<String?>(
+                                   "scanned_date",
+                                   null
+                               )
+                               .collectAsState()
+
+                           val scannedBarcode by backStackEntry
+                               .savedStateHandle
+                               .getStateFlow<String?>(
+                                   "barcode",
+                                   null
+                               )
+                               .collectAsState()
 
                            AddProductScreen(
                                viewModel = viewModel,
@@ -136,15 +150,17 @@ class MainActivity : ComponentActivity() {
                                    navController.popBackStack()
                                },
                                onScanClick = {
-                                   navController.navigate(
-                                       Screen.Scan.createRoute("")
-                                   )
+                                   navController.navigate(Screen.Scan.route)
                                },
-                               scannedDate = scannedDate
+                               scannedDate = scannedDate,
+                               scannedBarcode = scannedBarcode,
+                               onBarcodeScanClick = {
+                                   navController.navigate(Screen.BarcodeScan.route)
+                               }
                            )
                        }
 
-                       composable("scan/{detectedDate}") {
+                       composable(Screen.Scan.route) {
 
                            ScanScreen(
                                onBackClick = {
@@ -187,6 +203,23 @@ class MainActivity : ComponentActivity() {
                                },
                                onBackClick = {
                                    viewModel.clearSelectedProduct()
+                                   navController.popBackStack()
+                               }
+                           )
+                       }
+
+                       composable(route = Screen.BarcodeScan.route) {
+
+                           BarcodeScanScreen(
+
+                               onBackClick = {
+                                   navController.popBackStack()
+                               },
+                               onBarcodeDetected = { barcode ->
+                                   navController.previousBackStackEntry
+                                       ?.savedStateHandle
+                                       ?.set("barcode", barcode)
+
                                    navController.popBackStack()
                                }
                            )

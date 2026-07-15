@@ -27,7 +27,9 @@ fun AddProductScreen(
     onProductAdded: () -> Unit,
     onBackClick: () -> Unit,
     onScanClick: () -> Unit,
-    scannedDate: String?
+    scannedDate: String?,
+    scannedBarcode: String?,
+    onBarcodeScanClick: () -> Unit
 ) {
 
     var name by remember { mutableStateOf("") }
@@ -38,6 +40,7 @@ fun AddProductScreen(
     var expiryDate by remember {
         mutableStateOf(System.currentTimeMillis())
     }
+    var barcode by remember { mutableStateOf("") }
 
     LaunchedEffect(scannedDate) {
 
@@ -45,6 +48,12 @@ fun AddProductScreen(
 
             expiryDate =
                 convertDateToMillis(it)
+        }
+    }
+
+    LaunchedEffect(scannedBarcode) {
+        scannedBarcode?.let {
+            barcode = it
         }
     }
 
@@ -220,7 +229,8 @@ fun AddProductScreen(
                     name = name,
                     category = category,
                     quantity = quantity.toInt(),
-                    expiryDate = expiryDate
+                    expiryDate = expiryDate,
+                    barcode = barcode.trim().ifBlank { null }
                 )
 
                 viewModel.addProduct(product)
@@ -239,6 +249,25 @@ fun AddProductScreen(
             Spacer(modifier = Modifier.width(8.dp))
 
             Text("Save Product")
+        }
+
+        OutlinedTextField(
+            value = barcode,
+            onValueChange = { newValue ->
+                barcode = newValue
+            },
+            label = {
+                Text("Barcode")
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        OutlinedButton(
+            onClick = onBarcodeScanClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Scan Barcode")
         }
     }
 }

@@ -11,5 +11,6 @@ data class ProductEntity(
     val category: String,
     val expiryDate: Long,
     val quantity: Int,
+    val barcode: String? = null,
     val notes: String? = null
 )

@@ -6,7 +6,7 @@ sealed class Screen(val route: String) {
 
     data object AddProduct : Screen("add_product")
 
-    data object Scan : Screen("scan/{detectedDate") {
+    data object Scan : Screen("scan") {
 
         fun createRoute(
             detectedDate: String
@@ -20,4 +20,6 @@ sealed class Screen(val route: String) {
             return "edit_product/$productId"
         }
     }
+
+    data object BarcodeScan : Screen("barcode_scan")
 }

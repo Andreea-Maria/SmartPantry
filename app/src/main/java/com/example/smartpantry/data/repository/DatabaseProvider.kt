@@ -15,7 +15,9 @@ object DatabaseProvider {
                 context.applicationContext,
                 SmartPantryDatabase::class.java,
                 "smart_pantry_db"
-            ).build()
+            )
+                .fallbackToDestructiveMigration()
+                .build()
 
             INSTANCE = instance
             instance
