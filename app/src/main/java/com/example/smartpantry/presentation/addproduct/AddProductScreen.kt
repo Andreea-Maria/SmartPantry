@@ -1,5 +1,6 @@
 package com.example.smartpantry.presentation.addproduct
 
+import android.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -8,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import com.example.smartpantry.data.local.ProductEntity
 import com.example.smartpantry.presentation.home.ProductViewModel
 import android.app.DatePickerDialog
+import android.graphics.Paint
 import android.widget.DatePicker
 import androidx.compose.ui.platform.LocalContext
 import com.example.smartpantry.presentation.home.formatDate
@@ -24,6 +26,7 @@ import com.example.smartpantry.presentation.home.convertDateToMillis
 @Composable
 fun AddProductScreen(
     viewModel: ProductViewModel,
+    lookupViewModel: ProductLookupViewModel,
     onProductAdded: () -> Unit,
     onBackClick: () -> Unit,
     onScanClick: () -> Unit,
@@ -42,6 +45,8 @@ fun AddProductScreen(
     }
     var barcode by remember { mutableStateOf("") }
 
+    val lookupUiState by lookupViewModel.uiState.collectAsState()
+
     LaunchedEffect(scannedDate) {
 
         scannedDate?.let {
@@ -52,8 +57,28 @@ fun AddProductScreen(
     }
 
     LaunchedEffect(scannedBarcode) {
-        scannedBarcode?.let {
-            barcode = it
+        scannedBarcode?.let { value ->
+
+            barcode = value
+
+            lookupViewModel.lookupBarcode(value)
+        }
+    }
+
+    LaunchedEffect(lookupUiState.product) {
+        lookupUiState.product?.let { product ->
+
+            product.productName
+                ?.takeIf { it.isNotBlank() }
+                ?.let { productName ->
+                    name = productName
+                }
+
+            product.categories
+                ?.takeIf { it.isNotBlank() }
+                ?.let { categories ->
+                    category = categories
+                }
         }
     }
 
@@ -98,6 +123,7 @@ fun AddProductScreen(
                 contentDescription = "Back",
                 modifier = Modifier
                     .clickable {
+                        lookupViewModel.clearResult()
                         onBackClick()
                     }
                     .padding(end = 12.dp)
@@ -213,6 +239,61 @@ fun AddProductScreen(
             }
         }
 
+        OutlinedTextField(
+            value = barcode,
+            onValueChange = { newValue ->
+                barcode = newValue
+            },
+            label = {
+                Text("Barcode")
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        if (lookupUiState.isLoading) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp)
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text("Searching product information...")
+            }
+        }
+
+        lookupUiState.errorMessage?.let { message ->
+            Text(
+                text = message,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        OutlinedButton(
+            onClick = onBarcodeScanClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Scan Barcode")
+        }
+
+        OutlinedButton(
+            onClick = {
+                lookupViewModel.lookupBarcode(barcode)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled =
+                barcode.isNotBlank() &&
+            !lookupUiState.isLoading
+        ) {
+            Text("Find Product Information")
+        }
+
+
         Button(
             onClick = {
                 nameError = name.isBlank()
@@ -235,6 +316,8 @@ fun AddProductScreen(
 
                 viewModel.addProduct(product)
 
+                lookupViewModel.clearResult()
+
                 onProductAdded()
             },
             modifier = Modifier.fillMaxWidth(),
@@ -251,23 +334,5 @@ fun AddProductScreen(
             Text("Save Product")
         }
 
-        OutlinedTextField(
-            value = barcode,
-            onValueChange = { newValue ->
-                barcode = newValue
-            },
-            label = {
-                Text("Barcode")
-            },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-
-        OutlinedButton(
-            onClick = onBarcodeScanClick,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Scan Barcode")
-        }
     }
 }

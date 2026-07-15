@@ -42,6 +42,9 @@ import com.example.smartpantry.presentation.editproduct.EditProductScreen
 import com.example.smartpantry.presentation.barcode.BarcodeScanScreen
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.example.smartpantry.data.repository.ProductLookupRepository
+import com.example.smartpantry.presentation.addproduct.ProductLookupViewModel
+import com.example.smartpantry.presentation.addproduct.ProductLookupViewModelFactory
 
 
 class MainActivity : ComponentActivity() {
@@ -54,6 +57,7 @@ class MainActivity : ComponentActivity() {
         val database = DatabaseProvider.getDatabase(this)
         val repository = ProductRepository(database.productDao())
         val authRepository = AuthRepository()
+        val productLookupRepository = ProductLookupRepository()
         val workRequest =
             OneTimeWorkRequestBuilder<ExpiryCheckWorker>()
                 .build()
@@ -84,6 +88,14 @@ class MainActivity : ComponentActivity() {
                 val viewModel: ProductViewModel = viewModel(
                     factory = ProductViewModelFactory(repository)
                 )
+
+                val productLookupViewModel:
+                        ProductLookupViewModel = viewModel(
+                            factory =
+                                ProductLookupViewModelFactory(
+                                    productLookupRepository
+                                )
+                        )
 
                 val authViewModel: AuthViewModel = viewModel(
                     factory = AuthViewModelFactory(authRepository)
@@ -146,6 +158,7 @@ class MainActivity : ComponentActivity() {
                                onProductAdded = {
                                    navController.popBackStack()
                                },
+                               lookupViewModel = productLookupViewModel,
                                onBackClick = {
                                    navController.popBackStack()
                                },
