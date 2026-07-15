@@ -227,6 +227,7 @@ fun EditProductScreen(
 
                     val updatedProduct = ProductEntity(
                         id = productId,
+                        userId = selectedProduct?.userId.orEmpty(),
                         name = name,
                         category = category,
                         quantity = quantity.toInt(),

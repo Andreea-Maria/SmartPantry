@@ -8,9 +8,12 @@ class ProductRepository(
     private val productDao: ProductDao
 ) {
 
-    fun getAllProducts(): Flow<List<ProductEntity>> {
-        return productDao.getAllProducts()
+    fun getAllProducts(
+        userId: String
+    ): Flow<List<ProductEntity>> {
+        return productDao.getAllProducts(userId)
     }
+
 
     suspend fun insertProduct(product: ProductEntity) {
         productDao.insertProduct(product)

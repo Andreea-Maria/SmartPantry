@@ -1,23 +1,33 @@
 package com.example.smartpantry.presentation.home
 
-import androidx.camera.core.impl.utils.Optional
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.smartpantry.data.local.ProductEntity
 import com.example.smartpantry.data.repository.ProductRepository
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.StateFlow
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import javax.inject.Singleton
 
 @HiltViewModel
 class ProductViewModel @Inject constructor(
-    private val repository: ProductRepository
+    private val repository: ProductRepository,
+    private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
     private val searchQuery = MutableStateFlow("")
@@ -28,6 +38,22 @@ class ProductViewModel @Inject constructor(
 
     private val _selectedProduct =
         MutableStateFlow<ProductEntity?>(null)
+
+    private val currentUserId = callbackFlow {
+
+        val listener  =
+            FirebaseAuth.AuthStateListener { auth ->
+                trySend(
+                    auth.currentUser?.uid
+                )
+            }
+
+        firebaseAuth.addAuthStateListener(listener)
+
+        awaitClose {
+            firebaseAuth.removeAuthStateListener(listener)
+        }
+    }
 
     val selectedProduct: StateFlow<ProductEntity?> =
         _selectedProduct
@@ -44,10 +70,17 @@ class ProductViewModel @Inject constructor(
         filterOption.value = option
     }
 
-    val products = repository.getAllProducts()
-        .combine(
-            searchQuery
-        ) { products, query ->
+    val products =
+        currentUserId
+            .flatMapLatest { userId ->
+
+                if (userId.isNullOrBlank()) {
+                    flowOf(emptyList())
+                } else {
+                    repository.getAllProducts(userId)
+                }
+            }
+        .combine(searchQuery) { products, query ->
 
             if (query.isBlank()) {
                 products
@@ -146,8 +179,12 @@ class ProductViewModel @Inject constructor(
         }
 
     fun addProduct(product: ProductEntity) {
+        val userId = firebaseAuth.currentUser?.uid ?: return
+
         viewModelScope.launch {
-            repository.insertProduct(product)
+            repository.insertProduct(
+                product.copy(userId = userId)
+            )
         }
     }
 
@@ -165,8 +202,16 @@ class ProductViewModel @Inject constructor(
     }
 
     fun updateProduct(product: ProductEntity) {
+        val userId =
+            firebaseAuth.currentUser?.uid
+                ?: return
+
         viewModelScope.launch {
-            repository.updateProduct(product)
+            repository.updateProduct(
+                product.copy(
+                    userId = userId
+                )
+            )
         }
     }
 

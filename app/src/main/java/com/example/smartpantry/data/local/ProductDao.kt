@@ -6,8 +6,16 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ProductDao {
 
-    @Query("SELECT * FROM products ORDER BY expiryDate ASC")
-    fun getAllProducts(): Flow<List<ProductEntity>>
+    @Query(
+        """
+            SELECT * FROM products
+            WHERE userId = :userId
+            ORDER BY expiryDate ASC
+            """
+    )
+    fun getAllProducts(
+        userId: String
+    ): Flow<List<ProductEntity>>
 
     @Query("SELECT * FROM products WHERE id = :id")
     suspend fun getProductById(id: Int): ProductEntity?

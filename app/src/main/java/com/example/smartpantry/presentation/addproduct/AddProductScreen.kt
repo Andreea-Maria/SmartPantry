@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.Alignment
 import com.example.smartpantry.presentation.home.convertDateToMillis
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AddProductScreen(
