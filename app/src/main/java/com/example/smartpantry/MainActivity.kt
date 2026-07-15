@@ -1,52 +1,38 @@
 package com.example.smartpantry
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.internal.composableLambda
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
-import com.example.smartpantry.data.repository.DatabaseProvider
-import com.example.smartpantry.data.repository.ProductRepository
-import com.example.smartpantry.presentation.addproduct.AddProductScreen
-import com.example.smartpantry.presentation.home.HomeScreen
-import com.example.smartpantry.presentation.home.ProductViewModel
-import com.example.smartpantry.presentation.home.ProductViewModelFactory
-import com.example.smartpantry.presentation.navigation.Screen
-import com.example.smartpantry.ui.theme.SmartPantryTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.core.app.ActivityCompat
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.smartpantry.presentation.addproduct.AddProductScreen
+import androidx.navigation.navArgument
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.example.smartpantry.presentation.worker.ExpiryCheckWorker
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.core.app.ActivityCompat
-import androidx.navigation.NavHost
-import com.example.smartpantry.data.auth.AuthRepository
+import com.example.smartpantry.presentation.addproduct.AddProductScreen
+import com.example.smartpantry.presentation.addproduct.ProductLookupViewModel
 import com.example.smartpantry.presentation.auth.AuthScreen
 import com.example.smartpantry.presentation.auth.AuthViewModel
-import com.example.smartpantry.presentation.auth.AuthViewModelFactory
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import com.example.smartpantry.presentation.scan.ScanScreen
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
-import com.example.smartpantry.presentation.editproduct.EditProductScreen
 import com.example.smartpantry.presentation.barcode.BarcodeScanScreen
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import com.example.smartpantry.data.repository.ProductLookupRepository
-import com.example.smartpantry.presentation.addproduct.ProductLookupViewModel
-import com.example.smartpantry.presentation.addproduct.ProductLookupViewModelFactory
+import com.example.smartpantry.presentation.editproduct.EditProductScreen
+import com.example.smartpantry.presentation.home.HomeScreen
+import com.example.smartpantry.presentation.home.ProductViewModel
+import com.example.smartpantry.presentation.navigation.Screen
+import com.example.smartpantry.presentation.scan.ScanScreen
+import com.example.smartpantry.presentation.worker.ExpiryCheckWorker
+import com.example.smartpantry.ui.theme.SmartPantryTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,10 +40,6 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
-        val database = DatabaseProvider.getDatabase(this)
-        val repository = ProductRepository(database.productDao())
-        val authRepository = AuthRepository()
-        val productLookupRepository = ProductLookupRepository()
         val workRequest =
             OneTimeWorkRequestBuilder<ExpiryCheckWorker>()
                 .build()
@@ -85,21 +67,14 @@ class MainActivity : ComponentActivity() {
 
             SmartPantryTheme {
 
-                val viewModel: ProductViewModel = viewModel(
-                    factory = ProductViewModelFactory(repository)
-                )
+                val productViewModel: ProductViewModel =
+                    hiltViewModel()
 
-                val productLookupViewModel:
-                        ProductLookupViewModel = viewModel(
-                            factory =
-                                ProductLookupViewModelFactory(
-                                    productLookupRepository
-                                )
-                        )
+                val productLookupViewModel: ProductLookupViewModel =
+                    hiltViewModel()
 
-                val authViewModel: AuthViewModel = viewModel(
-                    factory = AuthViewModelFactory(authRepository)
-                )
+                val authViewModel: AuthViewModel =
+                    hiltViewModel()
 
                 val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
@@ -120,7 +95,7 @@ class MainActivity : ComponentActivity() {
                        composable(Screen.Home.route) {
 
                            HomeScreen(
-                               viewModel = viewModel,
+                               viewModel = productViewModel,
                                onAddClick = {
                                    navController.navigate(Screen.AddProduct.route)
                                },
@@ -154,7 +129,7 @@ class MainActivity : ComponentActivity() {
                                .collectAsState()
 
                            AddProductScreen(
-                               viewModel = viewModel,
+                               viewModel = productViewModel,
                                onProductAdded = {
                                    navController.popBackStack()
                                },
@@ -210,12 +185,12 @@ class MainActivity : ComponentActivity() {
 
                            EditProductScreen(
                                productId = productId,
-                               viewModel = viewModel,
+                               viewModel = productViewModel,
                                onProductUpdated = {
                                    navController.popBackStack()
                                },
                                onBackClick = {
-                                   viewModel.clearSelectedProduct()
+                                   productViewModel.clearSelectedProduct()
                                    navController.popBackStack()
                                }
                            )

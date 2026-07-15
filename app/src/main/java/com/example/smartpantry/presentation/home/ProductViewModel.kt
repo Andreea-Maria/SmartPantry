@@ -2,7 +2,6 @@ package com.example.smartpantry.presentation.home
 
 import androidx.camera.core.impl.utils.Optional
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.smartpantry.data.local.ProductEntity
 import com.example.smartpantry.data.repository.ProductRepository
@@ -13,8 +12,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.StateFlow
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class ProductViewModel(
+@HiltViewModel
+class ProductViewModel @Inject constructor(
     private val repository: ProductRepository
 ) : ViewModel() {
 
@@ -172,13 +174,4 @@ class ProductViewModel(
         _selectedProduct.value = null
     }
 
-}
-
-class ProductViewModelFactory(
-    private val repository: ProductRepository
-) : ViewModelProvider.Factory {
-
-    override fun <T : ViewModel> create(modelclass: Class<T>): T{
-        return ProductViewModel(repository) as T
-    }
 }

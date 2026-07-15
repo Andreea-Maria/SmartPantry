@@ -10,7 +10,7 @@ kotlin = "2.2.10"
 composeBom = "2026.02.01"
 navigationCompose = "2.9.0"
 room = "2.8.4"
-ksp = "2.2.10-2.0.2"
+ksp = "2.3.6"
 lifecycleViewmodelCompose = "2.10.0"
 workRuntimeKtx = "2.11.0"
 firebaseBom = "34.6.0"
@@ -19,6 +19,8 @@ camerax = "1.5.0"
 mlkitTextRecognition = "16.0.1"
 mlkitBarcodeScanning = "17.3.0"
 retrofit = "3.0.0"
+hilt = "2.59.2"
+hiltNavigationCompose = "1.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,10 +53,14 @@ mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition"
 mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcodeScanning" }
 retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 

@@ -1,16 +1,14 @@
 package com.example.smartpantry.presentation.addproduct
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.smartpantry.data.remote.OpenFoodProduct
 import com.example.smartpantry.data.repository.ProductLookupRepository
-import com.google.mlkit.vision.barcode.common.Barcode
-import kotlinx.coroutines.channels.produce
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class ProductLookupUiState(
     val isLoading: Boolean = false,
@@ -18,7 +16,8 @@ data class ProductLookupUiState(
     val errorMessage: String? = null
 )
 
-class ProductLookupViewModel(
+@HiltViewModel
+class ProductLookupViewModel @Inject constructor(
     private val repository: ProductLookupRepository
 ) : ViewModel() {
 
@@ -63,29 +62,5 @@ class ProductLookupViewModel(
 
     fun clearResult() {
         _uiState.value = ProductLookupUiState()
-    }
-}
-
-class ProductLookupViewModelFactory(
-    private val repository: ProductLookupRepository
-) : ViewModelProvider.Factory {
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(
-        modelClass: Class<T>
-    ): T {
-        if (
-            modelClass.isAssignableFrom(
-                ProductLookupViewModel::class.java
-            )
-        ) {
-            return ProductLookupViewModel(
-                repository
-            ) as T
-        }
-
-        throw IllegalArgumentException(
-            "Unknown ViewModel class"
-        )
     }
 }
